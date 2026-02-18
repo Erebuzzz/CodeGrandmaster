@@ -12,9 +12,70 @@ The core of CodeGrandmaster is its hierarchical multi-agent architecture, mirror
 
 ### System Architecture Diagram
 
-[![System Architecture Diagram](docs/architecture.svg)](https://erebuzzz.github.io/CodeGrandmaster/docs/architecture-diagram.html)
+### System Architecture Diagram
 
-_Click the diagram to view the interactive version._
+```mermaid
+graph TD
+    subgraph External [External World]
+        CF[Codeforces API]
+    end
+
+    subgraph Entry [Entry Layer]
+        Gateway[API Gateway]
+        CF --> Gateway
+    end
+
+    subgraph Control [Control Layer]
+        Orch{Orchestrator}
+        Token[Token Budget Monitor]
+        Gateway --> Orch
+        Orch -.-> Token
+    end
+
+    subgraph Memory [Session Memory]
+        Redis[(Session Workspace)]
+        Logs[Decision Logs]
+        Orch <--> Redis
+        Redis --- Logs
+    end
+
+    subgraph Agents [Agent Hierarchy]
+        direction TB
+        H1[H1: Intern<br/>(Constraint Extraction)]
+        H2[H2: Engineer<br/>(Strategy Refinement)]
+        H3[H3: Senior<br/>(Correctness Proof)]
+        H4[H4: Lead<br/>(Trade-off Analysis)]
+        H5[H5: CEO<br/>(Final Decision)]
+        
+        H1 --> H2 --> H3 --> H4 --> H5
+    end
+
+    subgraph Execution [Verification Layer]
+        Sandbox[Execution Sandbox<br/>(C++ Compiler / Tests)]
+        Verify[Verification Engine<br/>(Stress / Edge Cases)]
+        
+        Orch --> Sandbox
+        Sandbox --> Verify
+        Verify -- Pass --> Orch
+        Verify -- Fail --> Orch
+        
+        H2 -.-> Sandbox
+        H5 -.-> Sandbox
+    end
+
+    subgraph Governance [Governance]
+        ELO[Rating Manager]
+        Verify -- Success --> ELO
+    end
+
+    Orch -->|Activate based on Rating| H1
+    Orch -->|Activate based on Rating| H3
+    Orch -->|Activate based on Rating| H5
+
+    linkStyle default stroke-width:2px,fill:none,stroke:gray;
+```
+
+_Note: This is a structural overview. For the fully interactive, animated visualization, please open [architecture-diagram.html](https://erebuzzz.github.io/CodeGrandmaster/architecture-diagram.html) in your browser._
 
 
 ### Key Components
