@@ -12,7 +12,7 @@ The core of CodeGrandmaster is its hierarchical multi-agent architecture, mirror
 
 ### System Architecture Diagram
 
-[![System Architecture Diagram](docs/architecture.svg)](https://erebuzzz.github.io/CodeGrandmaster/docs/architecture-diagram.html)
+[![System Architecture Diagram](docs/architecture.svg)]([https://erebuzzz.github.io/CodeGrandmaster/docs/architecture-diagram.html](https://erebuzzz.github.io/CodeGrandmaster/architecture-diagram.html))
 
 _Click the diagram to view the interactive version._
 
