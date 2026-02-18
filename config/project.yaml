@@ -1,0 +1,16 @@
+project:
+  name: hierarchical-codeforces-solver
+  version: 0.1.0
+  environment: production
+
+api:
+  provider: codeforces
+  endpoints:
+    - problemset.problems
+    - contest.list
+    - contest.standings
+
+session:
+  isolation: per_problem
+  reset_on_completion: true
+  export_enabled: true

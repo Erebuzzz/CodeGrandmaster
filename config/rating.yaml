@@ -1,0 +1,14 @@
+rating:
+  system: elo
+
+  parameters:
+    K: 32
+
+  formulas:
+    expected_score: "1 / (1 + 10^((Rp - Ra)/400))"
+    update_rule: "R_new = R_old + K(S - E)"
+
+  tracked_metrics:
+    - solve_rate_by_bucket
+    - escalation_frequency
+    - verification_failure_rate

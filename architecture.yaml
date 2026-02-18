@@ -1,0 +1,251 @@
+project:
+  name: Hierarchical Multi-Agent Codeforces Solver
+  version: 0.1.0
+  description: >
+    A hierarchical, rating-aware, multi-agent system for solving
+    Codeforces problems in real time. Includes session-scoped memory,
+    execution verification, ELO-style rating governance, and optional
+    chess-strategic abstraction layer.
+
+  goals:
+    - Real-time problem solving via Codeforces API
+    - Structured multi-agent hierarchy
+    - Hallucination mitigation through verification
+    - Token-cost efficiency
+    - ELO-based adaptive activation
+    - Optional chess-inspired explanation mapping
+
+architecture:
+  layers:
+    - entry
+    - control
+    - reasoning
+    - verification
+    - governance
+    - abstraction
+    - deployment
+
+entry:
+  api_gateway:
+    integrations:
+      - name: Codeforces API
+        endpoints:
+          - problemset.problems
+          - contest.list
+          - contest.standings
+    responsibilities:
+      - Fetch problem metadata
+      - Route problem to orchestrator
+      - Return final solution + explanation
+    outputs:
+      - solution_code
+      - explanation
+      - confidence_score
+      - rating_update
+
+control:
+  orchestrator:
+    responsibilities:
+      - Initialize session workspace
+      - Activate agents based on problem rating
+      - Manage escalation cycles
+      - Enforce convergence rules
+      - Reset session on completion
+    activation_policy:
+      thresholds:
+        - rating_range: "<1200"
+          active_agents: [H1, H2]
+        - rating_range: "1200-1800"
+          active_agents: [H1, H2, H3]
+        - rating_range: "1800-2200"
+          active_agents: [H1, H2, H3, H4]
+        - rating_range: ">=2200"
+          active_agents: [H1, H2, H3, H4, H5]
+    escalation:
+      max_revision_cycles: 2
+      trigger_conditions:
+        - confidence_below_threshold
+        - verification_failed
+      convergence_condition: "phi(Sigma_next) >= phi(Sigma_current)"
+
+  token_budget_monitor:
+    strategy: strict_per_role_caps
+    cost_model:
+      formula: "C_total = sum(t_i * lambda_i)"
+    limits:
+      H1: 300
+      H2: 600
+      H3: 800
+      H4: 600
+      H5: 500
+    actions_on_exceed:
+      - summarize_output
+      - truncate_context
+      - deny_escalation_if_unnecessary
+
+reasoning:
+  agent_hierarchy:
+    ordering: "H1 < H2 < H3 < H4 < H5"
+    roles:
+      H1:
+        name: Intern Agent
+        target_rating: 900
+        responsibilities:
+          - Extract constraints
+          - Propose candidate paradigms
+          - Rough time complexity estimation
+        output_schema:
+          proposed_paradigm: string
+          estimated_complexity: string
+          confidence: float
+
+      H2:
+        name: Engineer Agent
+        target_rating: 1500
+        responsibilities:
+          - Refine strategies
+          - Eliminate infeasible approaches
+          - Structure algorithm design
+        output_schema:
+          refined_strategy: string
+          reasoning_notes: string
+          updated_confidence: float
+
+      H3:
+        name: Senior Agent
+        target_rating: 1900
+        responsibilities:
+          - Formal correctness reasoning
+          - Edge case identification
+          - Complexity optimization
+        output_schema:
+          proof_sketch: string
+          edge_cases: list
+          optimized_complexity: string
+          confidence: float
+
+      H4:
+        name: Lead Agent
+        target_rating: 2300
+        responsibilities:
+          - Compare candidate strategies
+          - Select optimal trade-off
+          - Validate scalability
+        output_schema:
+          selected_strategy: string
+          rejection_reasons: list
+          confidence: float
+
+      H5:
+        name: CEO Agent
+        target_rating: 2700
+        responsibilities:
+          - Final approval
+          - Confidence calibration
+          - Trigger rating update
+        output_schema:
+          final_decision: string
+          final_confidence: float
+          rating_adjustment: float
+
+session_memory:
+  isolation: per_problem_session
+  storage_model: structured_json_workspace
+  files:
+    - problem_spec.json
+    - constraint_analysis.json
+    - candidate_strategies.json
+    - decision_log.json
+    - proof_notes.md
+    - test_results.json
+    - final_solution.cpp
+  rules:
+    - append_only_edits_with_reason
+    - no_cross_session_context
+    - snapshot_before_escalation
+  export:
+    enabled: true
+    format: zipped_session_bundle
+
+verification:
+  execution_sandbox:
+    isolation:
+      - containerized_environment
+      - cpu_limit
+      - memory_cap
+      - no_network_access
+    language_support:
+      - C++
+    failure_modes_detected:
+      - TLE
+      - MLE
+      - RTE
+      - WA
+
+  verification_engine:
+    components:
+      - sample_test_validation
+      - randomized_stress_tests
+      - adversarial_edge_case_generation
+    pass_condition: "all_tests_passed"
+    escalation_trigger: true
+
+governance:
+  rating_system:
+    type: elo_style
+    formula:
+      expected_score: "E = 1 / (1 + 10^((Rp - Ra)/400))"
+      update_rule: "R_new = R_old + K(S - E)"
+    tracked_entities:
+      - agent_tiers
+      - solve_rate_by_rating_bucket
+    calibration:
+      confidence_weighted_updates: true
+
+abstraction:
+  chess_mapping:
+    enabled: true
+    mapping:
+      greedy: "Initiative Play"
+      dynamic_programming: "Positional Accumulation"
+      backtracking: "Variation Calculation"
+      game_theory: "Perfect Adversarial Play"
+    role: explanatory_only
+    affects_correctness_pipeline: false
+
+deployment:
+  architecture_style: microservices
+  services:
+    - api_gateway
+    - orchestrator_service
+    - agent_pool_service
+    - session_memory_manager
+    - execution_sandbox
+    - rating_manager
+  scaling:
+    horizontal_scaling: true
+    async_job_queue: true
+    load_balancing_by_rating: true
+
+monitoring:
+  metrics:
+    - solve_rate_by_rating
+    - average_token_usage
+    - escalation_frequency
+    - verification_failure_rate
+    - cost_per_problem
+  logging:
+    structured_session_logs: true
+    escalation_trace: true
+    rating_history: true
+
+termination:
+  success_condition:
+    - verification_passed
+    - confidence_above_threshold
+  failure_condition:
+    - max_revision_cycles_exceeded
+    - convergence_not_improving
+  post_completion:
+    - update_rating
+    - reset_session_memory

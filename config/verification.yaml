@@ -1,0 +1,14 @@
+verification:
+  execution:
+    language: cpp
+    cpu_limit: "2s"
+    memory_limit: "512Mi"
+    network_access: false
+
+  testing:
+    sample_tests: true
+    randomized_tests: true
+    adversarial_generation: true
+
+  pass_condition: all_tests_passed
+  escalate_on_failure: true

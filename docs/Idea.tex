@@ -1,0 +1,777 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\geometry{margin=1in}
+
+\title{Hierarchical Multi-Agent Architecture for Real-Time Codeforces Problem Solving with Chess-Inspired Strategic Abstraction}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Abstract}
+
+This document proposes a hierarchical multi-agent system designed to solve Codeforces problems in real time while providing structured explanations inspired by chess strategic archetypes. The system integrates role-based agent hierarchy, session-scoped file memory, rating-based governance, and computational cost control. The objective is to improve reasoning robustness, reduce hallucination, and maintain cost efficiency.
+
+\section{Motivation}
+
+Competitive programming and chess share structural similarities:
+\begin{itemize}
+    \item Adversarial reasoning
+    \item Strategic pattern recognition
+    \item Resource optimization under constraints
+    \item Evaluation of alternative branches
+\end{itemize}
+
+The proposed system models problem solving as an organizational hierarchy analogous to corporate structures and chess decision processes.
+
+\section{System Overview}
+
+The architecture consists of:
+
+\begin{enumerate}
+    \item Hierarchical agent roles
+    \item Session-scoped structured memory
+    \item Rating-based activation control
+    \item External execution verification
+    \item Token and computation cost control
+\end{enumerate}
+
+\section{Hierarchical Agent Roles}
+
+The system uses role specialization instead of monolithic reasoning.
+
+\subsection{Intern Agent}
+
+Responsibilities:
+\begin{itemize}
+    \item Extract problem constraints
+    \item Propose candidate paradigms
+    \item Estimate rough time complexity
+\end{itemize}
+
+Output schema:
+
+\begin{verbatim}
+{
+  "proposed_paradigm": "...",
+  "estimated_complexity": "...",
+  "confidence": 0.xx
+}
+\end{verbatim}
+
+\subsection{Engineer Agent}
+
+Responsibilities:
+\begin{itemize}
+    \item Refine candidate strategies
+    \item Eliminate infeasible approaches
+    \item Structure algorithm design
+\end{itemize}
+
+\subsection{Senior Engineer Agent}
+
+Responsibilities:
+\begin{itemize}
+    \item Prove correctness
+    \item Identify corner cases
+    \item Optimize complexity
+\end{itemize}
+
+\subsection{Lead Agent}
+
+Responsibilities:
+\begin{itemize}
+    \item Compare multiple viable strategies
+    \item Select optimal trade-off
+    \item Validate scalability
+\end{itemize}
+
+\subsection{CEO Agent}
+
+Responsibilities:
+\begin{itemize}
+    \item Final approval
+    \item Confidence calibration
+    \item Rating update
+    \item Generate final structured explanation
+\end{itemize}
+
+Authority flows upward. Feedback may flow across roles, but finalization authority remains hierarchical.
+
+\section{Session-Scoped File Memory}
+
+Each problem operates inside an isolated session workspace:
+
+\begin{verbatim}
+/session_id/
+    problem_spec.json
+    constraint_analysis.json
+    candidate_strategies.json
+    decision_log.json
+    proof_notes.md
+    test_results.json
+    final_solution.cpp
+\end{verbatim}
+
+Key principles:
+
+\begin{itemize}
+    \item Memory is isolated per problem
+    \item Files are structured and version-controlled
+    \item Agents interact only via file updates
+    \item No cross-session contamination
+\end{itemize}
+
+\section{Rating System}
+
+Each problem has a rating $R_p$.
+
+Each agent tier has a rating $R_a$.
+
+Expected success probability:
+
+\[
+E = \frac{1}{1 + 10^{(R_p - R_a)/400}}
+\]
+
+Rating update rule:
+
+\[
+R_{new} = R_{old} + K(S - E)
+\]
+
+Where:
+\begin{itemize}
+    \item $S = 1$ if solved successfully
+    \item $S = 0$ otherwise
+    \item $K$ is update constant
+\end{itemize}
+
+Hierarchy activation depends on problem rating. Lower-rated problems do not activate full stack.
+
+\section{Hallucination Mitigation}
+
+The system reduces hallucination through:
+
+\begin{enumerate}
+    \item Structured JSON outputs
+    \item Explicit constraint files
+    \item External execution validation
+    \item Limited revision cycles
+    \item Confidence-based escalation
+\end{enumerate}
+
+Execution validation is mandatory. Logical claims are verified through runtime testing.
+
+\section{Computation and Cost Control}
+
+\subsection{Model Tiering}
+
+\begin{itemize}
+    \item Lower roles use smaller models
+    \item Higher roles use larger models only when needed
+\end{itemize}
+
+\subsection{Token Budgeting}
+
+Each role has a strict token limit. Outputs exceeding limit must be summarized.
+
+\subsection{Adaptive Escalation}
+
+Higher-tier agents activate only if:
+\begin{itemize}
+    \item Confidence is low
+    \item Complexity risk detected
+    \item Verification fails
+\end{itemize}
+
+\section{Comparative Strategy Evaluation}
+
+Multiple strategies may be proposed. Comparison is based on:
+
+\begin{itemize}
+    \item Asymptotic complexity
+    \item Empirical runtime
+    \item Edge case robustness
+    \item Confidence score
+\end{itemize}
+
+Only top-ranked strategy proceeds to final approval.
+
+\section{Chess-Inspired Strategic Abstraction Layer}
+
+The system optionally maps algorithm paradigms to chess archetypes.
+
+Example mapping:
+
+\begin{itemize}
+    \item Greedy $\rightarrow$ Initiative play
+    \item Dynamic Programming $\rightarrow$ Positional accumulation
+    \item Backtracking $\rightarrow$ Variation calculation
+    \item Game Theory $\rightarrow$ Perfect adversarial play
+\end{itemize}
+
+This layer enhances pedagogical clarity but does not affect correctness verification.
+
+\section{Termination Criteria}
+
+A session concludes when:
+
+\begin{itemize}
+    \item All test cases pass
+    \item Confidence exceeds threshold
+    \item Maximum revision cycles reached
+\end{itemize}
+
+Session memory is then archived or discarded.
+
+\section{Conclusion}
+
+The proposed system combines hierarchical reasoning, structured memory, rating governance, and execution validation to build a robust and cost-aware multi-agent solver for Codeforces problems. The design emphasizes convergence, verification, and computational efficiency while enabling optional strategic abstraction inspired by chess.
+
+\section{Formal System Model}
+
+\subsection{Problem Definition}
+
+Let a Codeforces problem be defined as:
+
+\[
+P = (I, O, C, T)
+\]
+
+Where:
+\begin{itemize}
+    \item $I$ = Input specification
+    \item $O$ = Output specification
+    \item $C$ = Constraint set
+    \item $T$ = Tag set (algorithmic hints)
+\end{itemize}
+
+The objective of the system is to construct:
+
+\[
+S = (A, \Pi, \Phi)
+\]
+
+Where:
+\begin{itemize}
+    \item $A$ = Algorithm
+    \item $\Pi$ = Proof of correctness
+    \item $\Phi$ = Complexity characterization
+\end{itemize}
+
+Such that $A$ satisfies $C$ and produces correct $O$ for all valid $I$.
+
+\subsection{Hierarchical Agent Model}
+
+Define a set of agents:
+
+\[
+\mathcal{H} = \{H_1, H_2, H_3, H_4, H_5\}
+\]
+
+Where:
+\begin{itemize}
+    \item $H_1$ = Intern
+    \item $H_2$ = Engineer
+    \item $H_3$ = Senior Engineer
+    \item $H_4$ = Lead
+    \item $H_5$ = CEO
+\end{itemize}
+
+Each agent $H_i$ performs a transformation:
+
+\[
+H_i : (P, M_i) \rightarrow (M_{i+1})
+\]
+
+Where $M_i$ represents the structured session memory at stage $i$.
+
+Authority ordering is defined as:
+
+\[
+H_1 \prec H_2 \prec H_3 \prec H_4 \prec H_5
+\]
+
+Meaning decisions can only be finalized by higher-order agents.
+
+\section{Session Memory State Machine}
+
+Let the session state be:
+
+\[
+\Sigma = (F, D, V)
+\]
+
+Where:
+\begin{itemize}
+    \item $F$ = File state (problem, constraints, strategies)
+    \item $D$ = Decision log
+    \item $V$ = Verification status
+\end{itemize}
+
+State transitions follow:
+
+\[
+\Sigma_0 \rightarrow \Sigma_1 \rightarrow \dots \rightarrow \Sigma_k
+\]
+
+Termination condition:
+
+\[
+\Sigma_k \text{ is terminal if } V = \text{pass} \land \text{confidence} > \tau
+\]
+
+Where $\tau$ is confidence threshold.
+
+\section{Computation Cost Model}
+
+Let:
+
+\[
+C_{total} = \sum_{i=1}^{n} (t_i \cdot \lambda_i)
+\]
+
+Where:
+\begin{itemize}
+    \item $t_i$ = tokens used by agent $i$
+    \item $\lambda_i$ = cost per token for model used by agent $i$
+\end{itemize}
+
+To maintain cost efficiency:
+
+\[
+t_i \leq T_i^{max}
+\]
+
+Where $T_i^{max}$ is strict token budget per role.
+
+Escalation occurs only if:
+
+\[
+\text{confidence}_i < \theta_i
+\]
+
+Where $\theta_i$ is escalation threshold.
+
+\section{Adaptive Activation Policy}
+
+Let problem rating be $R_p$.
+
+Define activation function:
+
+\[
+\alpha(R_p) =
+\begin{cases}
+\{H_1, H_2\} & R_p < 1200 \\
+\{H_1, H_2, H_3\} & 1200 \le R_p < 1800 \\
+\{H_1, H_2, H_3, H_4\} & 1800 \le R_p < 2200 \\
+\mathcal{H} & R_p \ge 2200
+\end{cases}
+\]
+
+This ensures computational scaling based on difficulty.
+
+\section{Comparative Strategy Framework}
+
+Let candidate strategies be:
+
+\[
+\mathcal{S} = \{S_1, S_2, ..., S_k\}
+\]
+
+Each strategy is evaluated by:
+
+\[
+E(S_i) = w_1 \cdot \text{complexity} + 
+w_2 \cdot \text{runtime\_empirical} + 
+w_3 \cdot \text{confidence}
+\]
+
+Final selection:
+
+\[
+S^* = \arg\min_{S_i \in \mathcal{S}} E(S_i)
+\]
+
+Subject to correctness constraints.
+
+\section{Verification Framework}
+
+Verification consists of:
+
+\begin{enumerate}
+    \item Sample test validation
+    \item Randomized test generation
+    \item Adversarial edge case synthesis
+\end{enumerate}
+
+Let:
+
+\[
+V = \bigwedge_{j=1}^{m} \text{Test}_j(A) = \text{pass}
+\]
+
+Only if $V = \text{true}$ may finalization occur.
+
+\section{Chess Strategy Mapping Formalization}
+
+Define mapping:
+
+\[
+\mathcal{M}: \mathcal{A} \rightarrow \mathcal{C}
+\]
+
+Where:
+\begin{itemize}
+    \item $\mathcal{A}$ = Algorithmic paradigms
+    \item $\mathcal{C}$ = Chess strategic archetypes
+\end{itemize}
+
+Example mappings:
+
+\[
+\text{Greedy} \rightarrow \text{Initiative}
+\]
+\[
+\text{Dynamic Programming} \rightarrow \text{Positional Accumulation}
+\]
+\[
+\text{Game Theory} \rightarrow \text{Perfect Adversarial Play}
+\]
+
+This mapping is explanatory only and does not influence correctness.
+
+\section{Scalability Analysis}
+
+Worst-case multi-agent invocation cost:
+
+\[
+O(k \cdot T_{avg})
+\]
+
+Where:
+\begin{itemize}
+    \item $k$ = number of activated agents
+    \item $T_{avg}$ = average token usage per agent
+\end{itemize}
+
+With adaptive activation:
+
+\[
+E[C_{total}] \ll C_{max}
+\]
+
+Because higher-tier agents are invoked infrequently.
+
+\section{Failure Modes}
+
+\begin{itemize}
+    \item Reinforced internal hallucination
+    \item Over-escalation on trivial problems
+    \item Excessive token growth
+    \item Premature convergence
+\end{itemize}
+
+Mitigation strategies include strict budgets, deterministic checks, and hard termination rules.
+
+\section{Future Work}
+
+\begin{itemize}
+    \item Reinforcement learning for agent promotion/demotion
+    \item Self-play evaluation against historical Codeforces data
+    \item Empirical benchmarking across rating bands
+    \item Distributed execution framework
+\end{itemize}
+
+\section{Experimental Evaluation Plan}
+
+Evaluation metrics:
+
+\begin{itemize}
+    \item Solve rate by rating bucket
+    \item Average token usage per rating
+    \item Verification failure rate
+    \item Escalation frequency
+    \item Cost per solved problem
+\end{itemize}
+
+Benchmark datasets:
+\begin{itemize}
+    \item Historical Codeforces problem sets
+    \item Random unseen problem batches
+\end{itemize}
+
+Statistical significance measured using solve-rate comparison against single-agent baseline.
+
+\section{Orchestration Algorithm}
+
+The hierarchical workflow is coordinated by a central orchestrator.
+
+\subsection{High-Level Pseudocode}
+
+\begin{verbatim}
+function SOLVE_PROBLEM(problem_id):
+
+    P <- FETCH_FROM_CODEFORCES(problem_id)
+    INIT_SESSION_WORKSPACE(P)
+
+    active_agents <- ACTIVATE_BY_RATING(P.rating)
+
+    for agent in active_agents:
+        M <- LOAD_RELEVANT_FILES(agent)
+        response <- agent.PROCESS(P, M)
+        UPDATE_WORKSPACE(response)
+
+        if VERIFICATION_FAILED():
+            ESCALATE()
+        if CONFIDENCE_HIGH() and VERIFICATION_PASSED():
+            break
+
+    if VERIFICATION_PASSED():
+        FINALIZE_SOLUTION()
+        UPDATE_AGENT_RATINGS()
+    else:
+        MARK_UNRESOLVED()
+
+    RESET_SESSION()
+\end{verbatim}
+
+\subsection{Escalation Rule}
+
+Escalation is triggered if:
+
+\[
+\text{confidence}_i < \theta_i \quad \lor \quad V = \text{fail}
+\]
+
+Escalation depth is capped at $d_{max}$.
+
+\section{Real-Time Codeforces Integration}
+
+\subsection{API Endpoints}
+
+The system interacts with the Codeforces API:
+
+\begin{itemize}
+    \item \texttt{problemset.problems}
+    \item \texttt{contest.list}
+    \item \texttt{contest.standings}
+\end{itemize}
+
+\subsection{Problem Fetch Model}
+
+Let:
+
+\[
+P_{live} = (I, O, C, T, R_p)
+\]
+
+Where $R_p$ is problem rating.
+
+The system fetches metadata and automatically classifies:
+
+\[
+\hat{A}_0 = f(T, C)
+\]
+
+Where $f$ is initial paradigm predictor.
+
+\section{Deployment Architecture}
+
+\subsection{Microservice Structure}
+
+The system can be decomposed into:
+
+\begin{itemize}
+    \item Orchestrator Service
+    \item Agent Pool Service
+    \item Execution Sandbox
+    \item Verification Engine
+    \item Rating Manager
+    \item Session Memory Manager
+\end{itemize}
+
+\subsection{Service Interaction Flow}
+
+\begin{enumerate}
+    \item Orchestrator receives problem request
+    \item Session initialized
+    \item Agent invoked
+    \item Response stored in session memory
+    \item Code executed in sandbox
+    \item Verification result returned
+    \item Decision updated
+\end{enumerate}
+
+\subsection{Isolation Constraints}
+
+Each problem execution occurs in:
+\begin{itemize}
+    \item Isolated container
+    \item CPU-time limited sandbox
+    \item Memory bounded environment
+\end{itemize}
+
+\section{Complexity Bound on Multi-Agent Overhead}
+
+Let:
+\begin{itemize}
+    \item $k$ = number of active agents
+    \item $r$ = revision cycles
+    \item $T_{max}$ = max tokens per agent
+\end{itemize}
+
+Worst-case token cost:
+
+\[
+C_{worst} = k \cdot r \cdot T_{max}
+\]
+
+Given bounded $k$ and $r$:
+
+\[
+C_{worst} = O(1)
+\]
+
+Relative to number of agents.
+
+Thus, recursion depth does not grow unbounded.
+
+\section{Convergence Guarantee}
+
+Define a monotonic improvement function:
+
+\[
+\phi(\Sigma_i) = (\text{confidence}, V)
+\]
+
+Each escalation must satisfy:
+
+\[
+\phi(\Sigma_{i+1}) \ge \phi(\Sigma_i)
+\]
+
+Under partial ordering where:
+\begin{itemize}
+    \item Verification failure < Verification success
+    \item Lower confidence < Higher confidence
+\end{itemize}
+
+If no improvement occurs within $r_{max}$ cycles, session terminates.
+
+\section{Promotion and Demotion Mechanism}
+
+Each agent $H_i$ has rating $R_i$.
+
+Promotion rule:
+
+\[
+R_i > R_{threshold}^{i+1} \Rightarrow \text{eligible for promotion}
+\]
+
+Demotion rule:
+
+\[
+R_i < R_{threshold}^{i} \Rightarrow \text{restricted scope}
+\]
+
+This enables adaptive specialization over time.
+
+\section{Confidence Calibration Model}
+
+Let:
+\[
+\text{confidence} = g(\text{verification pass rate}, \text{complexity margin})
+\]
+
+Example:
+
+\[
+\text{confidence} =
+0.5 \cdot \text{test\_pass\_ratio}
++
+0.3 \cdot \text{complexity\_margin}
++
+0.2 \cdot \text{historical\_accuracy}
+\]
+
+Confidence threshold $\tau$ determines finalization.
+
+\section{Security and Integrity Considerations}
+
+\begin{itemize}
+    \item Prevent prompt injection via strict input parsing
+    \item Validate API inputs
+    \item Limit execution sandbox permissions
+    \item Prevent cross-session contamination
+\end{itemize}
+
+\section{Distributed Scaling Model}
+
+For large-scale deployment:
+
+\begin{itemize}
+    \item Horizontal scaling of agent pools
+    \item Queue-based orchestration
+    \item Async verification pipelines
+    \item Token budget monitoring service
+\end{itemize}
+
+Load balancing ensures high-rating problems receive priority compute.
+
+\section{Empirical Study Design}
+
+To evaluate system robustness:
+
+\subsection{Baseline Comparison}
+
+Compare against:
+\begin{itemize}
+    \item Single-agent LLM baseline
+    \item Deterministic template solver
+\end{itemize}
+
+Metrics:
+
+\begin{itemize}
+    \item Solve rate by rating bucket
+    \item Average cost per problem
+    \item Escalation depth frequency
+    \item Hallucination detection rate
+\end{itemize}
+
+\subsection{Ablation Studies}
+
+Remove one component at a time:
+
+\begin{itemize}
+    \item Remove hierarchy
+    \item Remove verification
+    \item Remove token cap
+    \item Remove session isolation
+\end{itemize}
+
+Measure degradation.
+
+\section{Theoretical Positioning}
+
+This system lies at intersection of:
+
+\begin{itemize}
+    \item Multi-agent reasoning systems
+    \item Structured memory architectures
+    \item Cost-aware LLM orchestration
+    \item Educational abstraction frameworks
+\end{itemize}
+
+It represents a hybrid symbolic-neural hierarchical solver model.
+
+\end{document}

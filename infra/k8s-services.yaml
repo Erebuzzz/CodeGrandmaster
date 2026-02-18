@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: cf-solver-service
+spec:
+  type: ClusterIP
+  selector:
+    app: cf-solver
+  ports:
+    - port: 80
+      targetPort: 8000

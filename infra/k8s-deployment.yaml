@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cf-solver
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: cf-solver
+  template:
+    metadata:
+      labels:
+        app: cf-solver
+    spec:
+      containers:
+        - name: solver
+          image: registry/cf-solver:latest
+          ports:
+            - containerPort: 8000
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+          env:
+            - name: ENV
+              value: production

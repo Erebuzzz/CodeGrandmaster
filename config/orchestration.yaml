@@ -1,0 +1,21 @@
+orchestration:
+  activation_policy:
+    - rating_range: "<1200"
+      active: [H1, H2]
+    - rating_range: "1200-1800"
+      active: [H1, H2, H3]
+    - rating_range: "1800-2200"
+      active: [H1, H2, H3, H4]
+    - rating_range: ">=2200"
+      active: [H1, H2, H3, H4, H5]
+
+  escalation:
+    max_revision_cycles: 2
+    trigger_conditions:
+      - verification_failed
+      - confidence_below_threshold
+    convergence_rule: "phi(next) >= phi(current)"
+
+  token_control:
+    enforce_strict_caps: true
+    summarization_on_overflow: true

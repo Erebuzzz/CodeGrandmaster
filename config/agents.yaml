@@ -1,0 +1,47 @@
+agents:
+  hierarchy_order: [H1, H2, H3, H4, H5]
+
+  H1:
+    name: Intern
+    target_rating: 900
+    token_limit: 300
+    responsibilities:
+      - extract_constraints
+      - propose_paradigms
+      - estimate_complexity
+
+  H2:
+    name: Engineer
+    target_rating: 1500
+    token_limit: 600
+    responsibilities:
+      - refine_strategy
+      - eliminate_infeasible
+      - structure_algorithm
+
+  H3:
+    name: Senior
+    target_rating: 1900
+    token_limit: 800
+    responsibilities:
+      - prove_correctness
+      - identify_edge_cases
+      - optimize_complexity
+
+  H4:
+    name: Lead
+    target_rating: 2300
+    token_limit: 600
+    responsibilities:
+      - compare_strategies
+      - select_optimal
+      - validate_scalability
+
+  H5:
+    name: CEO
+    target_rating: 2700
+    token_limit: 500
+    responsibilities:
+      - final_approval
+      - calibrate_confidence
+      - trigger_rating_update

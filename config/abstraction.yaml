@@ -1,0 +1,9 @@
+abstraction:
+  chess_mapping:
+    enabled: true
+    mapping:
+      greedy: initiative_play
+      dynamic_programming: positional_accumulation
+      backtracking: variation_calculation
+      game_theory: adversarial_play
+  explanatory_only: true

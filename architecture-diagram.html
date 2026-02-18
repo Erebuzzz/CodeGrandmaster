@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multi-Agent Codeforces Solver — Architecture</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #0c0e11;
+    --surface: #111418;
+    --surface2: #161b22;
+    --border: #1e2530;
+    --border-hi: #2a3545;
+    --c1: #4a9eff;
+    --c2: #a78bfa;
+    --c3: #34d399;
+    --c4: #fb923c;
+    --c5: #fbbf24;
+    --text: #94a3b8;
+    --text-hi: #cbd5e1;
+    --dim: #3d4f63;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    padding: 48px 32px;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.035) 1px, transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ─── HEADER ─── */
+  .header {
+    margin-bottom: 52px;
+    animation: up 0.7s ease both;
+  }
+
+  .header-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .dot-live {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--c3);
+    animation: blink 2.4s ease infinite;
+    flex-shrink: 0;
+  }
+
+  .eyebrow-text {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  h1 {
+    font-size: 21px;
+    font-weight: 600;
+    color: var(--text-hi);
+    letter-spacing: -0.3px;
+    line-height: 1.35;
+  }
+
+  h1 span { color: var(--c1); }
+
+  .subtitle {
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 0.3px;
+  }
+
+  /* ─── SECTION LABEL ─── */
+  .s-label {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .s-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ─── CARD ─── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    position: relative;
+    transition: border-color 0.25s, box-shadow 0.25s;
+  }
+
+  .card:hover {
+    border-color: var(--border-hi);
+  }
+
+  .card-icon {
+    width: 32px; height: 32px;
+    margin-bottom: 10px;
+  }
+
+  .card-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-hi);
+    margin-bottom: 5px;
+    letter-spacing: -0.1px;
+  }
+
+  .card-desc {
+    font-size: 11px;
+    color: var(--dim);
+    line-height: 1.65;
+  }
+
+  /* accent top line */
+  .card-c1::after { content:''; position:absolute; top:0; left:16px; right:16px; height:1px; background: linear-gradient(90deg, transparent, var(--c1), transparent); border-radius:1px; }
+  .card-c2::after { content:''; position:absolute; top:0; left:16px; right:16px; height:1px; background: linear-gradient(90deg, transparent, var(--c2), transparent); border-radius:1px; }
+  .card-c3::after { content:''; position:absolute; top:0; left:16px; right:16px; height:1px; background: linear-gradient(90deg, transparent, var(--c3), transparent); border-radius:1px; }
+  .card-c4::after { content:''; position:absolute; top:0; left:16px; right:16px; height:1px; background: linear-gradient(90deg, transparent, var(--c4), transparent); border-radius:1px; }
+  .card-c5::after { content:''; position:absolute; top:0; left:16px; right:16px; height:1px; background: linear-gradient(90deg, transparent, var(--c5), transparent); border-radius:1px; }
+
+  /* ─── TAGS ─── */
+  .tags { display:flex; flex-wrap:wrap; gap:5px; margin-top:10px; }
+  .tag {
+    font-size: 9px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.3px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .t1 { background: rgba(74,158,255,0.08); color: var(--c1); border:1px solid rgba(74,158,255,0.14); }
+  .t2 { background: rgba(167,139,250,0.08); color: var(--c2); border:1px solid rgba(167,139,250,0.14); }
+  .t3 { background: rgba(52,211,153,0.08); color: var(--c3); border:1px solid rgba(52,211,153,0.14); }
+  .t4 { background: rgba(251,146,60,0.08); color: var(--c4); border:1px solid rgba(251,146,60,0.14); }
+  .t5 { background: rgba(251,191,36,0.08); color: var(--c5); border:1px solid rgba(251,191,36,0.14); }
+
+  /* ─── GRIDS ─── */
+  .g3  { display:grid; grid-template-columns:1fr 2fr 1fr; gap:14px; }
+  .g5  { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; }
+  .g3b { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .g2  { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+
+  /* ─── SECTION WRAPPER ─── */
+  .section {
+    margin-bottom: 8px;
+    animation: up 0.6s ease both;
+  }
+  .section:nth-child(1)  { animation-delay:0.08s; }
+  .section:nth-child(3)  { animation-delay:0.20s; }
+  .section:nth-child(5)  { animation-delay:0.36s; }
+  .section:nth-child(7)  { animation-delay:0.52s; }
+  .section:nth-child(9)  { animation-delay:0.68s; }
+  .section:nth-child(11) { animation-delay:0.82s; }
+  .section:nth-child(13) { animation-delay:0.95s; }
+
+  /* ─── CONNECTOR ─── */
+  .conn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 0;
+    gap: 2px;
+    animation: up 0.5s ease both;
+  }
+
+  .conn-line {
+    width: 1px;
+    height: 22px;
+    background: var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .conn-line::after {
+    content: '';
+    position: absolute;
+    top: -100%;
+    left: 0;
+    width: 100%;
+    height: 60%;
+    background: linear-gradient(to bottom, transparent, var(--c1), transparent);
+    animation: flowDown 2s ease-in-out infinite;
+  }
+
+  .conn-arrow {
+    width: 5px; height: 5px;
+    border-right: 1px solid var(--border-hi);
+    border-bottom: 1px solid var(--border-hi);
+    transform: rotate(45deg);
+    margin-top: -3px;
+  }
+
+  .conn-label {
+    font-size: 9px;
+    color: var(--dim);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-top: 5px;
+  }
+
+  /* ─── AGENT BADGE ─── */
+  .a-badge {
+    position: absolute;
+    top: 14px; right: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 500;
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+
+  /* ─── ELO BAR ─── */
+  .elo-wrap { margin-top: 12px; }
+  .elo-track { height: 2px; background: var(--border); border-radius: 1px; overflow:hidden; margin-bottom:4px; }
+  .elo-fill  { height:100%; border-radius:1px; transform:scaleX(0); transform-origin:left; animation: grow 1.2s ease forwards; }
+  .elo-meta  { display:flex; justify-content:space-between; font-size:9px; font-family:'JetBrains Mono',monospace; color:var(--dim); }
+  .elo-d1 { animation-delay:0.55s; }
+  .elo-d2 { animation-delay:0.70s; }
+  .elo-d3 { animation-delay:0.85s; }
+  .elo-d4 { animation-delay:1.00s; }
+  .elo-d5 { animation-delay:1.15s; }
+
+  /* ─── FORMULA BOX ─── */
+  .formula {
+    margin-top:10px;
+    background: var(--surface2);
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding: 9px 12px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:10px;
+    color: var(--c5);
+    line-height:1.8;
+  }
+
+  /* ─── ACTIVATION TABLE ─── */
+  .act-table { width:100%; margin-top:10px; border-collapse:collapse; }
+  .act-table tr { border-bottom:1px solid var(--border); }
+  .act-table tr:last-child { border:none; }
+  .act-table td { padding:5px 0; font-size:10px; font-family:'JetBrains Mono',monospace; }
+  .act-table td:first-child { color:var(--c5); width:50%; }
+  .act-table td:last-child { color:var(--dim); }
+
+  /* ─── FILE LIST ─── */
+  .file-list { margin-top:10px; display:flex; flex-direction:column; gap:4px; }
+  .file-item { display:flex; align-items:center; gap:7px; font-size:10px; font-family:'JetBrains Mono',monospace; color:var(--dim); padding:2px 0; }
+
+  /* ─── SERVICE LIST ─── */
+  .svc-list { margin-top:10px; display:flex; flex-direction:column; gap:6px; }
+  .svc-item { display:flex; align-items:center; gap:8px; font-size:10px; color:var(--dim); }
+  .svc-dot  { width:5px; height:5px; border-radius:50%; flex-shrink:0; animation:blink 2s ease infinite; }
+
+  /* ─── CHESS GRID ─── */
+  .chess-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:10px; }
+  .chess-item { background:var(--surface2); border:1px solid var(--border); border-radius:6px; padding:7px 9px; font-size:9px; }
+  .chess-paradigm { color:var(--c2); font-weight:600; margin-bottom:2px; }
+  .chess-arch { color:var(--dim); font-family:'JetBrains Mono',monospace; }
+
+  /* ─── GATEWAY ─── */
+  .gateway-inner { display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:20px; }
+  .gateway-endpoints { display:flex; flex-direction:column; gap:4px; }
+  .endpoint { display:flex; align-items:center; gap:6px; font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--dim); }
+  .method { color:var(--c3); font-weight:500; }
+  .gateway-outputs { display:flex; flex-direction:column; gap:4px; text-align:right; }
+  .out-item { font-size:10px; color:var(--dim); }
+  .out-item span { color:var(--c1); }
+  .gateway-center { text-align:center; }
+  .gateway-center .card-title { font-size:14px; margin-bottom:3px; }
+
+  /* ─── ORCHESTRATOR ─── */
+  .card-orch {
+    background: linear-gradient(160deg, rgba(167,139,250,0.04) 0%, var(--surface) 55%);
+  }
+
+  /* ─── FLOW STEPS ─── */
+  .flow-row { display:flex; gap:0; align-items:stretch; margin-top:8px; overflow-x:auto; }
+  .flow-step { display:flex; flex-direction:column; align-items:center; flex:1; min-width:100px; }
+  .flow-step-inner { display:flex; align-items:center; width:100%; }
+  .flow-node {
+    flex:1;
+    background:var(--surface2);
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:8px 10px;
+    text-align:center;
+    font-size:9px;
+    color:var(--text);
+    line-height:1.5;
+  }
+  .flow-num { font-size:9px; font-weight:600; font-family:'JetBrains Mono',monospace; color:var(--c1); margin-bottom:4px; }
+  .flow-arrow-h {
+    width:18px; flex-shrink:0; position:relative;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .flow-arrow-h::before { content:''; position:absolute; width:100%; height:1px; background:var(--border-hi); }
+  .flow-arrow-h::after { content:''; width:4px; height:4px; border-right:1px solid var(--border-hi); border-top:1px solid var(--border-hi); transform:rotate(45deg); position:absolute; right:2px; }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes up {
+    from { opacity:0; transform:translateY(14px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  @keyframes blink {
+    0%,100% { opacity:1; }
+    50% { opacity:0.25; }
+  }
+  @keyframes flowDown {
+    0%   { top:-60%; }
+    100% { top:160%; }
+  }
+  @keyframes grow {
+    to { transform:scaleX(1); }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-eyebrow">
+      <div class="dot-live"></div>
+      <span class="eyebrow-text">System Architecture</span>
+    </div>
+    <h1>Hierarchical Multi-Agent <span>Codeforces Solver</span></h1>
+    <p class="subtitle">Session-Scoped Memory · ELO Rating System · Execution Verification · Chess Strategic Abstraction</p>
+  </div>
+
+
+  <!-- 1. API GATEWAY -->
+  <div class="section">
+    <div class="s-label">Entry Point</div>
+    <div class="card card-c1">
+      <div class="gateway-inner">
+
+        <div class="gateway-endpoints">
+          <div class="eyebrow-text" style="margin-bottom:6px;">Codeforces API</div>
+          <div class="endpoint">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect width="10" height="10" rx="2" fill="rgba(74,158,255,0.12)"/><path d="M2.5 5h5M6 3.5L7.5 5 6 6.5" stroke="#4a9eff" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="method">GET</span> problemset.problems
+          </div>
+          <div class="endpoint">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect width="10" height="10" rx="2" fill="rgba(74,158,255,0.12)"/><path d="M2.5 5h5M6 3.5L7.5 5 6 6.5" stroke="#4a9eff" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="method">GET</span> contest.list
+          </div>
+          <div class="endpoint">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect width="10" height="10" rx="2" fill="rgba(74,158,255,0.12)"/><path d="M2.5 5h5M6 3.5L7.5 5 6 6.5" stroke="#4a9eff" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="method">GET</span> contest.standings
+          </div>
+        </div>
+
+        <div class="gateway-center">
+          <svg style="display:block;margin:0 auto 10px;width:36px;height:36px;" viewBox="0 0 36 36" fill="none">
+            <rect width="36" height="36" rx="9" fill="rgba(74,158,255,0.07)" stroke="rgba(74,158,255,0.18)" stroke-width="1"/>
+            <rect x="9" y="9" width="18" height="12" rx="2" fill="none" stroke="#4a9eff" stroke-width="1.1"/>
+            <path d="M13 15h10M13 18h6" stroke="#4a9eff" stroke-width="1" stroke-linecap="round" opacity="0.5"/>
+            <circle cx="27" cy="27" r="4" fill="rgba(52,211,153,0.12)" stroke="#34d399" stroke-width="1"/>
+            <circle cx="27" cy="27" r="1.5" fill="#34d399"/>
+          </svg>
+          <div class="card-title">API Gateway</div>
+          <div class="card-desc">Receive · Fetch · Route · Return</div>
+        </div>
+
+        <div class="gateway-outputs">
+          <div class="eyebrow-text" style="margin-bottom:6px; text-align:right;">Response</div>
+          <div class="out-item"><span>solution</span>.cpp</div>
+          <div class="out-item"><span>explanation</span></div>
+          <div class="out-item"><span>confidence</span></div>
+          <div class="out-item"><span>rating</span> update</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="conn" style="animation-delay:0.18s">
+    <div class="conn-line"></div>
+    <div class="conn-arrow"></div>
+    <span class="conn-label">initialize session</span>
+  </div>
+
+  <!-- 2. CORE SERVICES -->
+  <div class="section">
+    <div class="s-label">Core Services</div>
+    <div class="g3">
+
+      <div class="card card-c3">
+        <svg class="card-icon" viewBox="0 0 32 32" fill="none">
+          <rect width="32" height="32" rx="8" fill="rgba(52,211,153,0.07)" stroke="rgba(52,211,153,0.14)" stroke-width="1"/>
+          <path d="M10 8h8l4 4v12H10V8z" fill="none" stroke="#34d399" stroke-width="1.1" stroke-linejoin="round"/>
+          <path d="M18 8v4h4" fill="none" stroke="#34d399" stroke-width="1.1" stroke-linejoin="round"/>
+          <path d="M13 17h6M13 20h4" stroke="#34d399" stroke-width="1" stroke-linecap="round" opacity="0.4"/>
+        </svg>
+        <div class="card-title">Session Memory</div>
+        <div class="card-desc">Isolated workspace per problem. Append-only JSON. No cross-session leakage.</div>
+        <div class="file-list">
+          <div class="file-item">
+            <svg width="9" height="10" viewBox="0 0 9 10" fill="none"><path d="M1.5 1h4l2 2v6h-6V1z" stroke="#34d399" stroke-width="0.7" stroke-linejoin="round" opacity="0.5"/></svg>
+            problem_spec.json
+          </div>
+          <div class="file-item">
+            <svg width="9" height="10" viewBox="0 0 9 10" fill="none"><path d="M1.5 1h4l2 2v6h-6V1z" stroke="#34d399" stroke-width="0.7" stroke-linejoin="round" opacity="0.5"/></svg>
+            candidate_strategies.json
+          </div>
+          <div class="file-item">
+            <svg width="9" height="10" viewBox="0 0 9 10" fill="none"><path d="M1.5 1h4l2 2v6h-6V1z" stroke="#34d399" stroke-width="0.7" stroke-linejoin="round" opacity="0.5"/></svg>
+            decision_log.json
+          </div>
+          <div class="file-item">
+            <svg width="9" height="10" viewBox="0 0 9 10" fill="none"><path d="M1.5 1h4l2 2v6h-6V1z" stroke="#34d399" stroke-width="0.7" stroke-linejoin="round" opacity="0.5"/></svg>
+            test_results.json
+          </div>
+          <div class="file-item">
+            <svg width="9" height="10" viewBox="0 0 9 10" fill="none"><path d="M1.5 1h4l2 2v6h-6V1z" stroke="#34d399" stroke-width="0.7" stroke-linejoin="round" opacity="0.5"/></svg>
+            final_solution.cpp
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-c2 card-orch">
+        <svg class="card-icon" viewBox="0 0 32 32" fill="none">
+          <rect width="32" height="32" rx="8" fill="rgba(167,139,250,0.07)" stroke="rgba(167,139,250,0.14)" stroke-width="1"/>
+          <circle cx="16" cy="16" r="3.5" fill="none" stroke="#a78bfa" stroke-width="1.1"/>
+          <circle cx="16" cy="16" r="1.2" fill="#a78bfa" opacity="0.7"/>
+          <path d="M16 8.5V12M16 20v3.5M8.5 16H12M20 16h3.5" stroke="#a78bfa" stroke-width="1.1" stroke-linecap="round" opacity="0.4"/>
+          <circle cx="16" cy="8.5" r="1.2" fill="none" stroke="#a78bfa" stroke-width="0.9" opacity="0.5"/>
+          <circle cx="16" cy="23.5" r="1.2" fill="none" stroke="#a78bfa" stroke-width="0.9" opacity="0.5"/>
+          <circle cx="8.5" cy="16" r="1.2" fill="none" stroke="#a78bfa" stroke-width="0.9" opacity="0.5"/>
+          <circle cx="23.5" cy="16" r="1.2" fill="none" stroke="#a78bfa" stroke-width="0.9" opacity="0.5"/>
+        </svg>
+        <div class="card-title">Orchestrator Service</div>
+        <div class="card-desc">Central coordinator. Activates agents by problem rating, manages escalation and convergence, finalizes and resets session.</div>
+        <table class="act-table">
+          <tr><td>Rp &lt; 1200</td><td>H1 + H2</td></tr>
+          <tr><td>1200 – 1800</td><td>H1 + H2 + H3</td></tr>
+          <tr><td>1800 – 2200</td><td>H1 + H2 + H3 + H4</td></tr>
+          <tr><td>Rp ≥ 2200</td><td>Full stack H1 → H5</td></tr>
+        </table>
+      </div>
+
+      <div class="card card-c4">
+        <svg class="card-icon" viewBox="0 0 32 32" fill="none">
+          <rect width="32" height="32" rx="8" fill="rgba(251,146,60,0.07)" stroke="rgba(251,146,60,0.14)" stroke-width="1"/>
+          <path d="M7 22L12 14l4 5 3-4 6 7" stroke="#fb923c" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <path d="M7 22h18" stroke="#fb923c" stroke-width="0.8" opacity="0.25" stroke-linecap="round"/>
+        </svg>
+        <div class="card-title">Token Budget Monitor</div>
+        <div class="card-desc">Enforces per-role token caps. Triggers summarization. Tracks cost per session.</div>
+        <div class="tags">
+          <span class="tag t4">tᵢ ≤ Tᵢᵐᵃˣ</span>
+          <span class="tag t4">conf &lt; θ → escalate</span>
+          <span class="tag t4">Σ tᵢ·λᵢ</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="conn" style="animation-delay:0.34s">
+    <div class="conn-line"></div>
+    <div class="conn-arrow"></div>
+    <span class="conn-label">activate agents — α(Rp)</span>
+  </div>
+
+  <!-- 3. AGENT POOL -->
+  <div class="section">
+    <div class="s-label">Agent Pool — H1 ≺ H2 ≺ H3 ≺ H4 ≺ H5</div>
+    <div class="g5">
+
+      <div class="card card-c1">
+        <span class="a-badge t1">H1</span>
+        <svg class="card-icon" viewBox="0 0 32 32" fill="none">
+          <rect width="32" height="32" rx="8" fill="rgba(74,158,255,0.06)" stroke="rgba(74,158,255,0.13)" stroke-width="1"/>
+          <circle cx="16" cy="13" r="4" fill="none" stroke="#4a9eff" stroke-width="1.1"/>
+          <path d="M9 25c0-3.866 3.134-7 7-7s7 3.134 7 7" stroke="#4a9eff" stroke-width="1.1" stroke-linecap="round" fill="none"/>
+        </svg>
+        <div class="card-title" style="font-size:11px;">Intern Agent</div>
+        <div class="card-desc" style="font-size:10px;">Extract constraints. Propose paradigms. Estimate complexity.</div>
+        <div class="elo-wrap">
+          <div class="elo-track"><div class="elo-fill elo-d1" style="width:28%; background:var(--c1);"></div></div>
+          <div class="elo-meta"><span>ELO</span><span style="color:var(--c1)">~900</span></div>
+        </div>
+      </div>
+
+      <div class="card card-c3">
+        <span class="a-badge t3">H2</span>
+        <svg class="card-icon" viewBox="0 0 32 32" fill="none">
+          <rect width="32" height="32" rx="8" fill="rgba(52,211,153,0.06)" stroke="rgba(52,211,153,0.13)" stroke-width="1"/>
+          <path d="M10 23l4-4 3 3 5-6" stroke="#34d399" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <rect x="8" y="8" width="7" height="5" rx="1.5" fill="none" stroke="#34d399" stroke-width="1"/>
+          <rect x="17" y="8" width="7" height="5" rx="1.5" fill="none" stroke="#34d399" stroke-width="1" opacity="0.35"/>
+        </svg>
+        <div class="card-title" style="font-size:11px;">Engineer Agent</div>
+        <div class="card-desc" style="font-size:10px;">Refine strategies. Eliminate infeasible. Structure algorithm.</div>
+        <div class="elo-wrap">
+          <div class="elo-track"><div class="elo-fill elo-d2" style="width:48%; background:var(--c3);"></div></div>
+          <div class="elo-meta"><span>ELO</span><span style="color:var(--c3)">~1500</span></div>
+        </div>
+      </div>
+
+      <div class="card card-c5">
+        <span class="a-badge t5">H3</span>
+        <svg class="card-icon" viewBox="0 0 32 32" fill="none">
+          <rect width="32" height="32" rx="8" fill="rgba(251,191,36,0.06)" stroke="rgba(251,191,36,0.13)" stroke-width="1"/>
+          <path d="M16 8l1.5 4.5H22l-3.7 2.7 1.4 4.3-3.7-2.7-3.7 2.7 1.4-4.3L10 12.5h4.5L16 8z" fill="none" stroke="#fbbf24" stroke-width="1.1" stroke-linejoin="round"/>
+        </svg>
+        <div class="card-title" style="font-size:11px;">Senior Agent</div>
+        <div class="card-desc" style="font-size:10px;">Prove correctness. Identify edge cases. Optimize complexity.</div>
+        <div class="elo-wrap">
+          <div class="elo-track"><div class="elo-fill elo-d3" style="width:64%; background:var(--c5);"></div></div>
+          <div class="elo-meta"><span>ELO</span><span style="color:var(--c5)">~1900</span></div>
+        </div>
+      </div>
+
+      <div class="card card-c4">
+        <span class="a-badge t4">H4</span>
+        <svg class="card-icon" viewBox="0 0 32 32" fill="none">
+          <rect width="32" height="32" rx="8" fill="rgba(251,146,60,0.06)" stroke="rgba(251,146,60,0.13)" stroke-width="1"/>
+          <path d="M8 20h4v4H8zM14 15h4v9h-4zM20 10h4v14h-4z" fill="none" stroke="#fb923c" stroke-width="1.1" stroke-linejoin="round"/>
+        </svg>
+        <div class="card-title" style="font-size:11px;">Lead Agent</div>
+        <div class="card-desc" style="font-size:10px;">Compare strategies. Select optimal trade-off. Validate scale.</div>
+        <div class="elo-wrap">
+          <div class="elo-track"><div class="elo-fill elo-d4" style="width:80%; background:var(--c4);"></div></div>
+          <div class="elo-meta"><span>ELO</span><span style="color:var(--c4)">~2300</span></div>
+        </div>
+      </div>
+
+      <div class="card card-c2">
+        <span class="a-badge t2">H5</span>
+        <svg class="card-icon" viewBox="0 0 32 32" fill="none">
+          <rect width="32" height="32" rx="8" fill="rgba(167,139,250,0.09)" stroke="rgba(167,139,250,0.18)" stroke-width="1"/>
+          <path d="M12 14v-2a4 4 0 0 1 8 0v2" fill="none" stroke="#a78bfa" stroke-width="1.1" stroke-linecap="round"/>
+          <rect x="10" y="14" width="12" height="10" rx="2" fill="none" stroke="#a78bfa" stroke-width="1.1"/>
+          <circle cx="16" cy="19" r="1.4" fill="#a78bfa" opacity="0.7"/>
+        </svg>
+        <div class="card-title" style="font-size:11px;">CEO Agent</div>
+        <div class="card-desc" style="font-size:10px;">Final approval. Confidence calibration. Trigger rating update.</div>
+        <div class="elo-wrap">
+          <div class="elo-track"><div class="elo-fill elo-d5" style="width:93%; background:var(--c2);"></div></div>
+          <div class="elo-meta"><span>ELO</span><span style="color:var(--c2)">~2700</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="conn" style="animation-delay:0.50s">
+    <div class="conn-line"></div>
+    <div class="conn-arrow"></div>
+    <span class="conn-label">generated code → execute</span>
+  </div>
+
+  <!-- 4. EXECUTION & VALIDATION -->
+  <div class="section">
+    <div class="s-label">Execution &amp; Validation</div>
+    <div class="g3b">
+
+      <div class="card card-c4">
+        <svg class="card-icon" viewBox="0 0 32 32" fill="none">
+          <rect width="32" height="32" rx="8" fill="rgba(251,146,60,0.06)" stroke="rgba(251,146,60,0.13)" stroke-width="1"/>
+          <rect x="6" y="6" width="20" height="20" rx="3" fill="none" stroke="#fb923c" stroke-width="1" stroke-dasharray="3 2"/>
+          <path d="M11 16l3-3 3 3 3-3" stroke="#fb923c" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <path d="M11 20h10" stroke="#fb923c" stroke-width="0.9" opacity="0.35" stroke-linecap="round"/>
+        </svg>
+        <div class="card-title">Execution Sandbox</div>
+        <div class="card-desc">Isolated container. Compiles C++. Runs sample + randomized tests. Detects TLE / MLE / RTE.</div>
+        <div class="tags">
+          <span class="tag t4">CPU limit</span>
+          <span class="tag t4">Memory cap</span>
+          <span class="tag t4">No network</span>
+        </div>
+      </div>
+
+      <div class="card card-c1">
+        <svg class="card-icon" viewBox="0 0 32 32" fill="none">
+          <rect width="32" height="32" rx="8" fill="rgba(74,158,255,0.06)" stroke="rgba(74,158,255,0.13)" stroke-width="1"/>
+          <path d="M10 16l4 4 8-8" stroke="#4a9eff" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <circle cx="16" cy="16" r="8" fill="none" stroke="#4a9eff" stroke-width="0.8" opacity="0.25"/>
+        </svg>
+        <div class="card-title">Verification Engine</div>
+        <div class="card-desc">Sample validation + stress testing + adversarial edge cases. Failure escalates (max 2 revision cycles).</div>
+        <div class="formula">V = ∧ⱼ Testⱼ(A) = pass</div>
+      </div>
+
+      <div class="card card-c5">
+        <svg class="card-icon" viewBox="0 0 32 32" fill="none">
+          <rect width="32" height="32" rx="8" fill="rgba(251,191,36,0.06)" stroke="rgba(251,191,36,0.13)" stroke-width="1"/>
+          <path d="M7 22c2-4 4-2 5-6s3-6 4-2 2 3 4-3 3-4 5-4" stroke="#fbbf24" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+          <circle cx="25" cy="9" r="1.4" fill="#fbbf24" opacity="0.7"/>
+        </svg>
+        <div class="card-title">Rating Manager</div>
+        <div class="card-desc">ELO-style ratings per agent tier. Success rate tracked by difficulty bucket.</div>
+        <div class="formula">
+          R_new = R_old + K(S − E)<br>
+          E = 1 / (1 + 10^((Rp−Ra)/400))
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="conn" style="animation-delay:0.66s">
+    <div class="conn-line"></div>
+    <div class="conn-arrow"></div>
+    <span class="conn-label">optional explanation layer</span>
+  </div>
+
+  <!-- 5. CHESS + MICROSERVICES -->
+  <div class="section">
+    <div class="s-label">Abstraction &amp; Deployment</div>
+    <div class="g2">
+
+      <div class="card card-c2">
+        <svg class="card-icon" viewBox="0 0 32 32" fill="none">
+          <rect width="32" height="32" rx="8" fill="rgba(167,139,250,0.06)" stroke="rgba(167,139,250,0.13)" stroke-width="1"/>
+          <path d="M13 23v-2h6v2" stroke="#a78bfa" stroke-width="1.1" stroke-linecap="round" fill="none"/>
+          <path d="M16 13v8" stroke="#a78bfa" stroke-width="1.1" stroke-linecap="round"/>
+          <path d="M14 13h4" stroke="#a78bfa" stroke-width="1.1" stroke-linecap="round"/>
+          <path d="M13 15s-2 0-2-2 2-2 2-2M19 15s2 0 2-2-2-2-2-2" stroke="#a78bfa" stroke-width="1" stroke-linecap="round" fill="none"/>
+          <rect x="11" y="23" width="10" height="2" rx="1" fill="none" stroke="#a78bfa" stroke-width="0.9"/>
+        </svg>
+        <div class="card-title">Chess Strategic Abstraction</div>
+        <div class="card-desc">Maps algorithm paradigms to chess archetypes. Explanatory only — does not affect the correctness pipeline.</div>
+        <div class="chess-grid">
+          <div class="chess-item"><div class="chess-paradigm">Greedy</div><div class="chess-arch">→ Initiative Play</div></div>
+          <div class="chess-item"><div class="chess-paradigm">DP</div><div class="chess-arch">→ Positional Accum.</div></div>
+          <div class="chess-item"><div class="chess-paradigm">Backtracking</div><div class="chess-arch">→ Variation Calc.</div></div>
+          <div class="chess-item"><div class="chess-paradigm">Game Theory</div><div class="chess-arch">→ Adversarial Play</div></div>
+        </div>
+      </div>
+
+      <div class="card card-c1">
+        <svg class="card-icon" viewBox="0 0 32 32" fill="none">
+          <rect width="32" height="32" rx="8" fill="rgba(74,158,255,0.06)" stroke="rgba(74,158,255,0.13)" stroke-width="1"/>
+          <rect x="6" y="6" width="8" height="8" rx="2" fill="none" stroke="#4a9eff" stroke-width="1"/>
+          <rect x="18" y="6" width="8" height="8" rx="2" fill="none" stroke="#4a9eff" stroke-width="1" opacity="0.45"/>
+          <rect x="6" y="18" width="8" height="8" rx="2" fill="none" stroke="#4a9eff" stroke-width="1" opacity="0.45"/>
+          <rect x="18" y="18" width="8" height="8" rx="2" fill="none" stroke="#4a9eff" stroke-width="1" opacity="0.25"/>
+          <path d="M14 10h4M10 14v4M22 14v4M14 22h4" stroke="#4a9eff" stroke-width="0.7" stroke-dasharray="2 1.5" opacity="0.35"/>
+        </svg>
+        <div class="card-title">Microservice Architecture</div>
+        <div class="card-desc">Horizontally scalable. Async job queue. Load balanced by problem rating tier.</div>
+        <div class="svc-list">
+          <div class="svc-item"><div class="svc-dot" style="background:var(--c2);animation-delay:0.0s"></div>Orchestrator Service</div>
+          <div class="svc-item"><div class="svc-dot" style="background:var(--c1);animation-delay:0.4s"></div>Agent Pool Service</div>
+          <div class="svc-item"><div class="svc-dot" style="background:var(--c3);animation-delay:0.8s"></div>Session Memory Manager</div>
+          <div class="svc-item"><div class="svc-dot" style="background:var(--c4);animation-delay:1.2s"></div>Execution Sandbox</div>
+          <div class="svc-item"><div class="svc-dot" style="background:var(--c5);animation-delay:1.6s"></div>Rating Manager</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 6. FLOW -->
+  <div class="section">
+    <div class="s-label">Orchestration Flow</div>
+    <div class="card" style="padding:20px 20px 16px;">
+      <div class="flow-row">
+        <div class="flow-step">
+          <div class="flow-num">01</div>
+          <div class="flow-step-inner">
+            <div class="flow-node">Fetch problem from Codeforces</div>
+            <div class="flow-arrow-h"></div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">02</div>
+          <div class="flow-step-inner">
+            <div class="flow-node">Init session workspace</div>
+            <div class="flow-arrow-h"></div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">03</div>
+          <div class="flow-step-inner">
+            <div class="flow-node">Activate agents α(Rp)</div>
+            <div class="flow-arrow-h"></div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">04</div>
+          <div class="flow-step-inner">
+            <div class="flow-node">H1 → H5 pipeline</div>
+            <div class="flow-arrow-h"></div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">05</div>
+          <div class="flow-step-inner">
+            <div class="flow-node">Sandbox executes code</div>
+            <div class="flow-arrow-h"></div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">06</div>
+          <div class="flow-step-inner">
+            <div class="flow-node">Pass → finalize + ELO update</div>
+            <div class="flow-arrow-h"></div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">07</div>
+          <div class="flow-step-inner">
+            <div class="flow-node" style="color:var(--c3);">Reset session</div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:9px; color:var(--dim); margin-top:10px; font-family:'JetBrains Mono',monospace; letter-spacing:0.3px;">
+        Fail → escalate · max 2 revision cycles · hard terminate if ϕ(Σᵢ₊₁) ≱ ϕ(Σᵢ)
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
