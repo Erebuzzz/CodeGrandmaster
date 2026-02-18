@@ -10,7 +10,12 @@ Please check out the [System Idea](docs/Idea.tex) for more details.
 
 The core of CodeGrandmaster is its hierarchical multi-agent architecture, mirroring a corporate structure with specialized roles and a chess-inspired strategic layer.
 
-**[View the Interactive Architecture Diagram](architecture-diagram.html)**
+### System Architecture Diagram
+
+[![System Architecture Diagram](docs/architecture.svg)](https://erebuzzz.github.io/CodeGrandmaster/docs/architecture-diagram.html)
+
+_Click the diagram to view the interactive version._
+
 
 ### Key Components
 
