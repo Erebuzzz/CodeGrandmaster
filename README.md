@@ -15,64 +15,86 @@ The core of CodeGrandmaster is its hierarchical multi-agent architecture, mirror
 ### System Architecture Diagram
 
 ```mermaid
-graph TD
-    subgraph External [External World]
-        CF[Codeforces API]
+flowchart LR
+    GW["API Gateway
+    ─────────────
+    Fetch · Route · Return"]:::blue
+
+    OR["Orchestrator Service
+    ─────────────
+    Activate · Escalate · Finalize"]:::purple
+
+    SM["Session Memory
+    ─────────────
+    problem_spec.json
+    candidate_strategies.json
+    decision_log.json
+    test_results.json
+    final_solution.cpp"]:::green
+
+    TM["Token Budget Monitor
+    ─────────────
+    tᵢ ≤ Tᵢᵐᵃˣ
+    conf < θ → escalate"]:::orange
+
+    subgraph AGENTS["Agent Pool  —  H1 ≺ H2 ≺ H3 ≺ H4 ≺ H5"]
+        H1["H1 · Intern
+        Extract constraints
+        Propose paradigms"]:::blue
+        H2["H2 · Engineer
+        Refine strategies
+        Eliminate infeasible"]:::green
+        H3["H3 · Senior
+        Prove correctness
+        Edge cases"]:::yellow
+        H4["H4 · Lead
+        Compare strategies
+        Select optimal"]:::orange
+        H5["H5 · CEO
+        Final approval
+        Confidence calibration"]:::purple
     end
 
-    subgraph Entry [Entry Layer]
-        Gateway[API Gateway]
-        CF --> Gateway
-    end
+    SB["Execution Sandbox
+    ─────────────
+    Compile C++
+    CPU + Memory limited
+    No network access"]:::orange
 
-    subgraph Control [Control Layer]
-        Orch{Orchestrator}
-        Token[Token Budget Monitor]
-        Gateway --> Orch
-        Orch -.-> Token
-    end
+    VE["Verification Engine
+    ─────────────
+    V = ∧ⱼ Testⱼ(A) = pass
+    Sample · Stress · Adversarial"]:::blue
 
-    subgraph Memory [Session Memory]
-        Redis[(Session Workspace)]
-        Logs[Decision Logs]
-        Orch <--> Redis
-        Redis --- Logs
-    end
+    RM["Rating Manager
+    ─────────────
+    R_new = R_old + K(S − E)
+    ELO per agent tier"]:::yellow
 
-    subgraph Agents [Agent Hierarchy]
-        direction TB
-        H1[H1: Intern<br/>(Constraint Extraction)]
-        H2[H2: Engineer<br/>(Strategy Refinement)]
-        H3[H3: Senior<br/>(Correctness Proof)]
-        H4[H4: Lead<br/>(Trade-off Analysis)]
-        H5[H5: CEO<br/>(Final Decision)]
-        
-        H1 --> H2 --> H3 --> H4 --> H5
-    end
+    CA["Chess Abstraction
+    ─────────────
+    Greedy → Initiative
+    DP → Positional Accum.
+    Backtracking → Variation"]:::purple
 
-    subgraph Execution [Verification Layer]
-        Sandbox[Execution Sandbox<br/>(C++ Compiler / Tests)]
-        Verify[Verification Engine<br/>(Stress / Edge Cases)]
-        
-        Orch --> Sandbox
-        Sandbox --> Verify
-        Verify -- Pass --> Orch
-        Verify -- Fail --> Orch
-        
-        H2 -.-> Sandbox
-        H5 -.-> Sandbox
-    end
+    GW -->|"problem_id"| OR
+    OR -->|"init workspace"| SM
+    OR -->|"monitor"| TM
+    OR -->|"α(Rp)"| AGENTS
+    SM <-->|"read / write"| AGENTS
+    H1 --> H2 --> H3 --> H4 --> H5
+    AGENTS -->|"final_solution.cpp"| SB
+    SB -->|"test_results.json"| VE
+    VE -->|"PASS"| RM
+    VE -->|"FAIL → escalate"| OR
+    RM -->|"update ELO"| OR
+    H5 -->|"optional"| CA
 
-    subgraph Governance [Governance]
-        ELO[Rating Manager]
-        Verify -- Success --> ELO
-    end
-
-    Orch -->|Activate based on Rating| H1
-    Orch -->|Activate based on Rating| H3
-    Orch -->|Activate based on Rating| H5
-
-    linkStyle default stroke-width:2px,fill:none,stroke:gray;
+    classDef blue   fill:#1a3a5c,stroke:#4a9eff,color:#a8d4ff
+    classDef purple fill:#2a1a4a,stroke:#a78bfa,color:#d4b8ff
+    classDef green  fill:#0f2e22,stroke:#34d399,color:#86efcc
+    classDef orange fill:#2e1a0a,stroke:#fb923c,color:#fcd0a8
+    classDef yellow fill:#2e2200,stroke:#fbbf24,color:#fde68a
 ```
 
 _Note: This is a structural overview. For the fully interactive, animated visualization, please open [architecture-diagram.html](https://erebuzzz.github.io/CodeGrandmaster/architecture-diagram.html) in your browser._
